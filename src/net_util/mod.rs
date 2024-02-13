@@ -1,5 +1,5 @@
 use anyhow::{Error, Result};
-use log::debug;
+use log::{debug, warn};
 use std::process::Command;
 use std::{net::IpAddr, str::FromStr};
 /*
@@ -139,15 +139,15 @@ impl ArpTable {
     debug!("Extracted device name -> {:?}", dev_name);
 
     // Extract the device's mac address.
+    let mut mac_address = sliced_str.get(4).unwrap().to_lowercase();
     let link_layer_addr_str = sliced_str.get(3).unwrap().to_lowercase();
     if link_layer_addr_str != "lladdr" {
-      return Err(Error::msg(format!(
+      warn!(
         "No link layer address found, expected 'lladdr' but got '{}'",
-        link_layer_addr_str,
-      )));
+        link_layer_addr_str
+      );
+      mac_address = "".to_string();
     }
-
-    let mac_address = sliced_str.get(4).unwrap().to_lowercase();
     debug!("Extracted device mac address -> {:?}", mac_address);
 
     // Attempt to parse the nud state.
